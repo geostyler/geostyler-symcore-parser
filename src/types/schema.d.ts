@@ -13,7 +13,7 @@ export type BoolExpression =
   | SpatialPredicate
   | TemporalPredicate
   | ArrayPredicate
-  | FunctionRef
+  | FunctionCall
   | ConditionalExpression
   | boolean;
 export type ComparisonPredicate =
@@ -42,7 +42,7 @@ export type NumericExpression =
   | number
   | PropertyRef
   | SystemIdentifier
-  | FunctionRef
+  | FunctionCall
   | ConditionalExpression;
 /**
  * @minItems 2
@@ -56,7 +56,7 @@ export type ArithmeticOperands = [
     | BitwiseNot
     | PropertyRef
     | SystemIdentifier
-    | FunctionRef
+    | FunctionCall
     | ConditionalExpression
     | number
   ),
@@ -67,7 +67,7 @@ export type ArithmeticOperands = [
     | BitwiseNot
     | PropertyRef
     | SystemIdentifier
-    | FunctionRef
+    | FunctionCall
     | ConditionalExpression
     | number
   )
@@ -79,7 +79,7 @@ export type BitwiseOperand =
   | BitwiseNot
   | PropertyRef
   | SystemIdentifier
-  | FunctionRef
+  | FunctionCall
   | ConditionalExpression
   | number
   | HexNumber;
@@ -93,9 +93,9 @@ export type CharacterExpression =
   | string
   | PropertyRef
   | SystemIdentifier
-  | FunctionRef
+  | FunctionCall
   | ConditionalExpression;
-export type GeomExpression = SpatialInstance | PropertyRef | SystemIdentifier | FunctionRef | ConditionalExpression;
+export type GeomExpression = SpatialInstance | PropertyRef | SystemIdentifier | FunctionCall | ConditionalExpression;
 export type SpatialInstance =
   | GeometryLiteral
   | BboxLiteral
@@ -110,19 +110,15 @@ export type GeometryLiteral =
   | GeoJSONMultiLineString
   | GeoJSONMultiPolygon;
 export type Bbox = Bbox1 & Bbox2;
-export type Bbox1 =
-  | {
-      [k: string]: unknown;
-    }
-  | {
-      [k: string]: unknown;
-    };
+export type Bbox1 = {
+  [k: string]: unknown;
+};
 export type Bbox2 = number[];
 export type TemporalExpression =
   | TemporalInstance
   | PropertyRef
   | SystemIdentifier
-  | FunctionRef
+  | FunctionCall
   | ConditionalExpression;
 export type TemporalInstance = InstantInstance | IntervalInstance;
 export type InstantInstance = DateInstant | TimestampInstant;
@@ -133,8 +129,8 @@ export type TimestampString = string;
  * @maxItems 2
  */
 export type IntervalArray = [
-  InstantString | ".." | PropertyRef | SystemIdentifier | FunctionRef | ConditionalExpression,
-  InstantString | ".." | PropertyRef | SystemIdentifier | FunctionRef | ConditionalExpression
+  InstantString | ".." | PropertyRef | SystemIdentifier | FunctionCall | ConditionalExpression,
+  InstantString | ".." | PropertyRef | SystemIdentifier | FunctionCall | ConditionalExpression
 ];
 export type InstantString = DateString | TimestampString;
 export type Array = (
@@ -164,8 +160,8 @@ export type TemporalOperands = unknown[];
  * @maxItems 2
  */
 export type ArrayArguments = [
-  Array | PropertyRef | SystemIdentifier | FunctionRef | ConditionalExpression,
-  Array | PropertyRef | SystemIdentifier | FunctionRef | ConditionalExpression
+  Array | PropertyRef | SystemIdentifier | FunctionCall | ConditionalExpression,
+  Array | PropertyRef | SystemIdentifier | FunctionCall | ConditionalExpression
 ];
 export type ZeroToOne = NumericExpression | number;
 export type Fill =
@@ -180,7 +176,7 @@ export type Fill =
       hatchStyle?: HatchStyle;
       [k: string]: unknown;
     };
-export type IdOrFnExpression = SystemIdentifier | PropertyRef | FunctionRef | ConditionalExpression;
+export type IdOrFnExpression = SystemIdentifier | PropertyRef | FunctionCall | ConditionalExpression;
 export type Color =
   | IdOrFnExpression
   | {
@@ -524,7 +520,7 @@ export type PathNodes =
       value: UnitPoint;
       [k: string]: unknown;
     };
-export type ArrayExpression = (Array | PropertyRef | SystemIdentifier | FunctionRef | ConditionalExpression)[];
+export type ArrayExpression = (Array | PropertyRef | SystemIdentifier | FunctionCall | ConditionalExpression)[];
 export type Rectangle = ClosedShape & {
   type: "Rectangle";
   topLeft: UnitPoint;
@@ -830,23 +826,56 @@ export interface SystemIdentifier {
     | "dataLayer"
     | "dataLayer.id"
     | "dataLayer.type"
+    | "dataLayer.features"
+    | "dataLayer.featuresGeometry"
     | "dataLayer.featuresGeometryDimensions"
+    | "feature"
+    | "feature.id"
+    | "feature.geometry"
+    | "feature.geometryDimensions"
     | "vis"
     | "vis.sd"
+    | "vis.date"
+    | "vis.date.day"
+    | "vis.date.month"
+    | "vis.date.year"
+    | "vis.dateTime"
+    | "vis.dateTime.date"
+    | "vis.dateTime.date.day"
+    | "vis.dateTime.date.month"
+    | "vis.dateTime.date.year"
+    | "vis.dateTime.time"
+    | "vis.dateTime.time.hour"
+    | "vis.dateTime.time.minutes"
+    | "vis.dateTime.time.seconds"
     | "vis.timeInterval"
     | "vis.timeInterval.start"
     | "vis.timeInterval.start.date"
+    | "vis.timeInterval.start.date.day"
+    | "vis.timeInterval.start.date.month"
+    | "vis.timeInterval.start.date.year"
+    | "vis.timeInterval.start.time"
+    | "vis.timeInterval.start.time.hour"
+    | "vis.timeInterval.start.time.minutes"
+    | "vis.timeInterval.start.time.seconds"
     | "vis.timeInterval.end"
-    | "vis.timeInterval.date";
+    | "vis.timeInterval.end.date"
+    | "vis.timeInterval.end.date.day"
+    | "vis.timeInterval.end.date.month"
+    | "vis.timeInterval.end.date.year"
+    | "vis.timeInterval.end.time"
+    | "vis.timeInterval.end.time.hour"
+    | "vis.timeInterval.end.time.minutes"
+    | "vis.timeInterval.end.time.seconds"
+    | "vis.timeOfDay"
+    | "vis.timeOfDay.hour"
+    | "vis.timeOfDay.minutes"
+    | "vis.timeOfDay.seconds";
   [k: string]: unknown;
 }
-export interface FunctionRef {
-  function: Function;
-  [k: string]: unknown;
-}
-export interface Function {
-  name: string;
-  args?: (
+export interface FunctionCall {
+  op: string;
+  args: (
     | CharacterExpression
     | NumericExpression
     | {
@@ -859,78 +888,76 @@ export interface Function {
   [k: string]: unknown;
 }
 export interface Casei {
-  casei: CharacterExpression;
+  op: "casei";
+  /**
+   * @minItems 1
+   * @maxItems 1
+   */
+  args: [CharacterExpression];
   [k: string]: unknown;
 }
 export interface Accenti {
-  accenti: CharacterExpression;
+  op: "accenti";
+  /**
+   * @minItems 1
+   * @maxItems 1
+   */
+  args: [CharacterExpression];
   [k: string]: unknown;
 }
 export interface LowerUpperCase {
-  function: {
-    name: "lowerCase" | "upperCase";
-    /**
-     * @minItems 1
-     * @maxItems 1
-     */
-    args: [CharacterExpression];
-    [k: string]: unknown;
-  };
+  op: "lowerCase" | "upperCase";
+  /**
+   * @minItems 1
+   * @maxItems 1
+   */
+  args: [CharacterExpression];
   [k: string]: unknown;
 }
 export interface Concatenate {
-  function: {
-    name: "concatenate";
-    /**
-     * @minItems 2
-     */
-    args: [CharacterExpression, CharacterExpression, ...CharacterExpression[]];
-    [k: string]: unknown;
-  };
+  op: "concatenate";
+  /**
+   * @minItems 2
+   */
+  args: [CharacterExpression, CharacterExpression, ...CharacterExpression[]];
   [k: string]: unknown;
 }
 export interface Substitute {
-  function: {
-    name: "substitute";
-    /**
-     * @minItems 3
-     * @maxItems 3
-     */
-    args: [CharacterExpression, CharacterExpression, CharacterExpression];
-    [k: string]: unknown;
-  };
+  name?: "substitute";
+  /**
+   * @minItems 3
+   * @maxItems 3
+   */
+  args: [CharacterExpression, CharacterExpression, CharacterExpression];
   [k: string]: unknown;
 }
 export interface Format {
-  function: {
-    name: "format";
-    /**
-     * @minItems 1
-     */
-    args: [
-      (
-        | CharacterExpression
-        | NumericExpression
-        | {
-            [k: string]: unknown;
-          }
-        | GeomExpression
-        | TemporalExpression
-        | Array
-      ),
-      ...(
-        | CharacterExpression
-        | NumericExpression
-        | {
-            [k: string]: unknown;
-          }
-        | GeomExpression
-        | TemporalExpression
-        | Array
-      )[]
-    ];
-    [k: string]: unknown;
-  };
+  name?: "format";
+  /**
+   * @minItems 1
+   */
+  args: [
+    (
+      | CharacterExpression
+      | NumericExpression
+      | {
+          [k: string]: unknown;
+        }
+      | GeomExpression
+      | TemporalExpression
+      | Array
+    ),
+    ...(
+      | CharacterExpression
+      | NumericExpression
+      | {
+          [k: string]: unknown;
+        }
+      | GeomExpression
+      | TemporalExpression
+      | Array
+    )[]
+  ];
   [k: string]: unknown;
 }
 export interface GeoJSONPoint {
@@ -1010,39 +1037,30 @@ export interface BboxLiteral {
   [k: string]: unknown;
 }
 export interface GeometryManipulationBinary {
-  function: {
-    name: "s_intersection" | "s_union" | "s_difference" | "s_symDifference";
-    /**
-     * @minItems 2
-     * @maxItems 2
-     */
-    args: [SpatialInstance, SpatialInstance];
-    [k: string]: unknown;
-  };
+  name?: "s_intersection" | "s_union" | "s_difference" | "s_symDifference";
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  args: [SpatialInstance, SpatialInstance];
   [k: string]: unknown;
 }
 export interface GeometryManipulationUnary {
-  function: {
-    name: "s_convexHull" | "s_envelope";
-    /**
-     * @minItems 1
-     * @maxItems 1
-     */
-    args: [SpatialInstance];
-    [k: string]: unknown;
-  };
+  name?: "s_convexHull" | "s_envelope";
+  /**
+   * @minItems 1
+   * @maxItems 1
+   */
+  args: [SpatialInstance];
   [k: string]: unknown;
 }
 export interface GeometryBuffer {
-  function: {
-    name: "s_buffer";
-    /**
-     * @minItems 2
-     * @maxItems 2
-     */
-    args: [unknown, unknown];
-    [k: string]: unknown;
-  };
+  name?: "s_buffer";
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  args: [unknown, unknown];
   [k: string]: unknown;
 }
 export interface ConditionalExpression {
