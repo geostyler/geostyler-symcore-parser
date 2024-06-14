@@ -5,6 +5,7 @@ import {
   UnsupportedProperties,
   WriteStyleResult
 } from 'geostyler-style';
+
 import { CartoSymJSONSchema } from './types/schema';
 
 /**
